@@ -87,6 +87,18 @@
   #views button.on{background:var(--ink);color:#fff}
   #hint{position:absolute;top:18px;left:18px;font-size:12px;color:#6d645b;background:rgba(255,255,255,.6);padding:6px 11px;border-radius:9px}
   #err{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:40px;text-align:center;color:var(--bad)}
+  .ikea{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .ikea button{padding:9px 2px;font-weight:700;font-size:12px;letter-spacing:.5px}
+  .ikea small{display:block;font-weight:400;font-size:10px;color:var(--mute);letter-spacing:0;margin-top:1px}
+  .ikea button.on{background:var(--ink);color:#fff;border-color:var(--ink)} .ikea button.on small{color:#cfc8bf}
+  .icard{margin-top:10px;padding:12px 12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .icard p{margin:0 0 4px;font-size:12.5px;color:#5d554d}
+  .icard>button{width:100%;padding:10px;font-size:12.5px}
+  .plist{list-style:none;margin:0;padding:0;font-size:12.5px}
+  .plist li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .plist li:last-child{border:0} .plist b{white-space:nowrap}
+  .links{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 10px}
+  .links a{flex:1;text-align:center;padding:10px 8px;border:1px solid var(--line);border-radius:9px;color:var(--ink);text-decoration:none;font-weight:600;font-size:12.5px;white-space:nowrap}
   .mnav,.hudsum{display:none}
   .foot button{white-space:nowrap}
   @media (max-height:520px) and (min-width:821px){ #app{grid-template-columns:300px 1fr} #hud{width:200px;padding:10px 12px} #hint{display:none} }
@@ -110,6 +122,8 @@
     .presets button{padding:14px 12px;font-size:15px;text-align:left;display:flex;justify-content:space-between;align-items:center}
     .presets small{font-size:13px;margin:0}
     .seg button{min-height:42px;font-size:13px}
+    .ikea{grid-template-columns:repeat(2,1fr)} .ikea button{min-height:54px;font-size:14px} .ikea small{font-size:12px}
+    .links a{min-height:44px;display:flex;align-items:center;justify-content:center} .icard>button{min-height:44px}
     .sw{gap:11px} .sw button{width:44px;height:44px} .sw.sq button{width:48px}
     .tabs button{min-height:48px}
     .strip button{min-height:58px;font-size:11.5px}
@@ -177,6 +191,123 @@ const MODULES = {
   shoes:'Shoe wall', display:'Glass display', empty:'Open wall',
 };
 const HANG = new Set(['double','long','hangShelves','hangDrawers']);
+
+/* ───────── IKEA systems. Sizes and prices were read from ikea.com/us on 2026-11-16. ───────── */
+Object.assign(FINISHES, {
+  graybeige: {name:'Gray-beige', base:'#b7ab9c', dark:'#a89c8d', light:'#c3b8aa', grain:.12, rough:.7, sys:true},
+  darkgray:  {name:'Dark gray',  base:'#4a4b4e', dark:'#3c3d40', light:'#57585b', grain:.12, rough:.65, sys:true},
+  brownoak:  {name:'Brown stained oak', base:'#5b4232', dark:'#3a281c', light:'#765844', grain:.9, rough:.6, sys:true},
+  bamboo:    {name:'Bamboo',     base:'#d8bc88', dark:'#b89a62', light:'#ead4a6', grain:.8, rough:.55, sys:true},
+});
+const frac = v => { const w = Math.floor(v+1/32), e = Math.round((v-w)*8); return e <= 0 ? `${w}` : `${w} ${['','1/8','1/4','3/8','1/2','5/8','3/4','7/8'][e]}`; };
+const WHITE = '#f3f3f1', DGRAY = '#4a4b4e';
+const SYSTEMS = {
+  pax:{name:'PAX', tag:'wardrobe frames', style:'cabinet', gap:0, def:29.5,
+    blurb:'Wardrobe frames that stand on the floor and fix to the wall. You fit them out with KOMPLEMENT shelves, clothes rails and drawers.',
+    widths:[19.625,29.5,39.375], depths:[13.75,22.875], heights:[79.125,92.875],
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, graybeige:{name:'Gray-beige frames, white interiors',panel:'graybeige',shelf:'white',metal:WHITE}, darkgray:{name:'Dark gray',panel:'darkgray',shelf:'darkgray',metal:DGRAY}},
+    parts:{frame:(w,d,h)=>`PAX wall-mounted storage frame ${frac(w)}×${frac(d)}×${frac(h)}″`, shelf:(w,d)=>`KOMPLEMENT shelf ${frac(w)}×${frac(d)}″`, shoe:(w,d)=>`KOMPLEMENT shelf ${frac(w)}×${frac(d)}″`, rail:w=>`KOMPLEMENT clothes rail ${frac(w)}″`, drawer:(w,d)=>`KOMPLEMENT drawer ${frac(w)}×${frac(d)}″`},
+    url:'https://www.ikea.com/us/en/cat/pax-system-19086/',
+    notes:'The 13 3/4″ deep frames are too shallow for a front-facing clothes rail, so hanging sections need the 22 7/8″ depth.',
+    prices:[['Frame 19 5/8×22 7/8×92 7/8″','$170'],['Frame 29 1/2×22 7/8×92 7/8″','$180'],['Frame 39 3/8×22 7/8×92 7/8″','$200'],['Frame 29 1/2×13 3/4×92 7/8″','$170'],['Frame 29 1/2×13 3/4×79 1/8″','$160'],['KOMPLEMENT shelf 39 3/8×22 7/8″','$25'],['KOMPLEMENT drawer 39 3/8×22 7/8″','$50'],['KOMPLEMENT clothes rail 39 3/8″','$25']],
+    layouts:{
+      a:{label:'Hanging wall + tower', corner:'sides', unitH:92.875, walls:{
+        left:{depth:22.875,setback:20,bays:['double','long','hangDrawers'],widths:[39.375,29.5,29.5]},
+        back:{depth:13.75,setback:0,bays:['shelves'],widths:[29.5]},
+        right:{depth:13.75,setback:0,bays:['empty'],widths:[29.5]}}},
+      b:{label:'Three walls', corner:'back', unitH:92.875, walls:{
+        left:{depth:13.75,setback:9,bays:['shelves','drawers','shoes'],widths:[29.5,29.5,19.625]},
+        back:{depth:22.875,setback:0,bays:['double','long'],widths:[29.5,19.625]},
+        right:{depth:13.75,setback:9,bays:['shoes','shelves'],widths:[29.5,29.5]}}}}},
+  boaxel:{name:'BOAXEL', tag:'wall-mounted rails', style:'rail', gap:.6, def:23.625,
+    blurb:'Everything hangs from a rail screwed to the wall: uprights, brackets, shelves, clothes rails and mesh baskets. Nothing touches the floor.',
+    widths:[23.625,31.5], depths:[15.75], hRange:[80,94],
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, oak:{name:'White with oak-effect shelves',panel:'white',shelf:'oak',metal:WHITE}, anthracite:{name:'Anthracite',panel:'darkgray',shelf:'darkgray',metal:'#3c3e41'}},
+    parts:{shelf:w=>`BOAXEL shelf ${frac(w)}×15 3/4″`, shoe:w=>`BOAXEL shoe shelf ${frac(w)}×15 3/4″`, rail:w=>`BOAXEL clothes rail ${frac(w)}″`, drawer:w=>`BOAXEL mesh basket ${frac(w)}×15 3/4×5 7/8″`, bracket:()=>'BOAXEL bracket 15 3/4″'},
+    url:'https://www.ikea.com/us/en/cat/boaxel-system-47394/',
+    prices:[['Suspension rail 71 3/4″','$12'],['Wall upright 78 3/4″','$12'],['Bracket 15 3/4″','$3'],['Shelf 23 5/8×15 3/4″, white','$14'],['Shelf 31 1/2×15 3/4″, white','$16'],['Shelf 23 5/8×15 3/4″, oak effect','$18'],['Clothes rail 31 1/2″','$20'],['Mesh basket 23 5/8×15 3/4×5 7/8″','$19'],['Shoe shelf 31 1/2×15 3/4″','$14']],
+    layouts:{
+      a:{label:'Hanging wall + baskets', corner:'sides', unitH:82, walls:{
+        left:{depth:15.75,setback:16,bays:['double','long','hangDrawers'],widths:[31.5,31.5,23.625]},
+        back:{depth:15.75,setback:0,bays:['drawers'],widths:[31.5]},
+        right:{depth:15.75,setback:0,bays:['empty'],widths:[23.625]}}},
+      b:{label:'One long wall', corner:'sides', unitH:82, walls:{
+        left:{depth:15.75,setback:16,bays:['double','hangShelves','long','shoes'],widths:[23.625,23.625,23.625,23.625]},
+        back:{depth:15.75,setback:0,bays:['empty'],widths:[23.625]},
+        right:{depth:15.75,setback:0,bays:['empty'],widths:[23.625]}}}}},
+  aurdal:{name:'AURDAL', tag:'open side panels', style:'panel', gap:2.25, def:22.25,
+    blurb:'Slim side panels on legs, hung from a wall rail, with shelves, clothes rails and drawers between them. Open, with no doors or back.',
+    widths:[22.25], depths:[15.75], heights:[87],
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, darkgray:{name:'Dark gray',panel:'darkgray',shelf:'darkgray',metal:DGRAY}, oak:{name:'Oak veneer with white',panel:'oak',shelf:'white',metal:WHITE}, brownoak:{name:'Brown stained oak with dark gray',panel:'brownoak',shelf:'darkgray',metal:DGRAY}},
+    parts:{shelf:()=>'AURDAL shelf 22 1/4×15 3/4″', shoe:()=>'AURDAL shoe shelf 22 1/4×15 3/4″', rail:()=>'AURDAL clothes rail 22 1/4″', drawer:()=>'AURDAL drawer 22×16 3/8×6 1/2″'},
+    url:'https://www.ikea.com/us/en/cat/aurdal-system-47405/',
+    notes:'IKEA also sells an extendable AURDAL clothes rail (22 3/8 to 35 3/8″) for wider hanging-only gaps. This tool models the standard 22 1/4″ sections only.',
+    prices:[['Side panel with leg 15 3/4×87″','$40'],['Suspension rail 25 5/8″','$5'],['Shelf 22 1/4×15 3/4″','$10'],['Clothes rail 22 1/4″','$10'],['Extendable clothes rail','$15'],['Drawer 22×16 3/8×6 1/2″','$30'],['Shoe shelf 22 1/4×15 3/4″','$20'],['Wire basket with pull-out rail','$15']],
+    layouts:{
+      a:{label:'Hanging wall + shoes', corner:'sides', unitH:87, walls:{
+        left:{depth:15.75,setback:16,bays:['double','long','hangDrawers','shelves'],widths:[22.25,22.25,22.25,22.25]},
+        back:{depth:15.75,setback:0,bays:['shoes'],widths:[22.25]},
+        right:{depth:15.75,setback:0,bays:['empty'],widths:[22.25]}}},
+      b:{label:'Back wall + one side', corner:'back', unitH:87, walls:{
+        left:{depth:15.75,setback:16,bays:['hangDrawers','shelves','shoes'],widths:[22.25,22.25,22.25]},
+        back:{depth:15.75,setback:0,bays:['double','long'],widths:[22.25,22.25]},
+        right:{depth:15.75,setback:0,bays:['empty'],widths:[22.25]}}}}},
+  elvarli:{name:'ELVARLI', tag:'floor-to-ceiling posts', style:'post', gap:2.2, def:31.5,
+    blurb:'Posts clamp between floor and ceiling (87 1/4 to 137 3/4″) and carry brackets, shelves and clothes rails. White posts, with white or bamboo shelves.',
+    widths:[15.75,31.5], depths:[14.125,20.125], hRange:[72,88],
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, bamboo:{name:'White posts, bamboo shelves',panel:'white',shelf:'bamboo',metal:WHITE}},
+    parts:{shelf:(w,d)=>`ELVARLI shelf ${frac(w)}×${frac(d)}″${state.sysColor==='bamboo'?', bamboo':''}`, shoe:w=>`ELVARLI shoe shelf ${frac(w)}×14 1/8″`, rail:w=>`ELVARLI clothes rail ${frac(w)}″`, bracket:(w,d)=>`ELVARLI bracket for post ${frac(d)}″, 2-pack`},
+    url:'https://www.ikea.com/us/en/cat/elvarli-system-35766/',
+    notes:'Bamboo shelves are listed in the 20 1/8″ depth only, so choosing bamboo sets every wall to that depth. No ELVARLI drawer was listed, so drawer sections are switched off here.',
+    prices:[['Post 87 1/4–137 3/4″','$50'],['Bracket for post, 2-pack','$10'],['Shelf 31 1/2×14 1/8″, white','$30'],['Shelf 15 3/4×20 1/8″, white','$30'],['Shelf 31 1/2×20 1/8″, bamboo','$60'],['Shelf 15 3/4×20 1/8″, bamboo','$40'],['Clothes rail 31 1/2″','$20'],['Shoe shelf 31 1/2×14 1/8″','$30']],
+    layouts:{
+      a:{label:'Bamboo hanging wall', color:'bamboo', corner:'sides', unitH:84, walls:{
+        left:{depth:20.125,setback:18,bays:['double','long','hangShelves'],widths:[31.5,31.5,15.75]},
+        back:{depth:20.125,setback:0,bays:['shoes'],widths:[15.75]},
+        right:{depth:20.125,setback:0,bays:['empty'],widths:[31.5]}}},
+      b:{label:'White, three walls', color:'white', corner:'back', unitH:84, walls:{
+        left:{depth:14.125,setback:9,bays:['shelves','shoes','shelves'],widths:[31.5,31.5,15.75]},
+        back:{depth:20.125,setback:0,bays:['double','long'],widths:[31.5,15.75]},
+        right:{depth:14.125,setback:9,bays:['shoes','shelves'],widths:[31.5,31.5]}}}}},
+};
+for (const k in SYSTEMS) SYSTEMS[k].id = k;
+const PRICES = {
+  'PAX wall-mounted storage frame 19 5/8×22 7/8×92 7/8″':170, 'PAX wall-mounted storage frame 29 1/2×22 7/8×92 7/8″':180, 'PAX wall-mounted storage frame 39 3/8×22 7/8×92 7/8″':200,
+  'PAX wall-mounted storage frame 29 1/2×13 3/4×92 7/8″':170, 'PAX wall-mounted storage frame 29 1/2×13 3/4×79 1/8″':160,
+  'KOMPLEMENT shelf 39 3/8×22 7/8″':25, 'KOMPLEMENT drawer 39 3/8×22 7/8″':50, 'KOMPLEMENT clothes rail 39 3/8″':25,
+  'BOAXEL suspension rail 71 3/4″':12, 'BOAXEL wall upright 78 3/4″':12, 'BOAXEL bracket 15 3/4″':3, 'BOAXEL shelf 23 5/8×15 3/4″':14, 'BOAXEL shelf 31 1/2×15 3/4″':16,
+  'BOAXEL clothes rail 31 1/2″':20, 'BOAXEL mesh basket 23 5/8×15 3/4×5 7/8″':19, 'BOAXEL shoe shelf 31 1/2×15 3/4″':14,
+  'AURDAL side panel with leg 15 3/4×87″':40, 'AURDAL suspension rail 25 5/8″':5, 'AURDAL shelf 22 1/4×15 3/4″':10, 'AURDAL clothes rail 22 1/4″':10, 'AURDAL drawer 22×16 3/8×6 1/2″':30, 'AURDAL shoe shelf 22 1/4×15 3/4″':20,
+  'ELVARLI post 87 1/4–137 3/4″':50, 'ELVARLI shelf 31 1/2×14 1/8″':30, 'ELVARLI shelf 15 3/4×20 1/8″':30, 'ELVARLI shelf 31 1/2×20 1/8″, bamboo':60, 'ELVARLI shelf 15 3/4×20 1/8″, bamboo':40,
+  'ELVARLI clothes rail 31 1/2″':20, 'ELVARLI shoe shelf 31 1/2×14 1/8″':30, 'ELVARLI bracket for post 14 1/8″, 2-pack':10, 'ELVARLI bracket for post 20 1/8″, 2-pack':10,
+};
+const STORE = {name:'IKEA Sunrise', addr:'151 NW 136th Ave, Sunrise, FL 33325', url:'https://www.ikea.com/us/en/stores/sunrise/'};
+function allowed(S, depth, m){
+  if (!S) return true;
+  if (m === 'display') return false;
+  if (S.id === 'pax' && depth < 20 && HANG.has(m)) return false;
+  if (S.id === 'elvarli' && (m === 'drawers' || m === 'hangDrawers')) return false;
+  return true;
+}
+function applySystem(id, lay, color){
+  const S = SYSTEMS[id], key = S.layouts[lay] ? lay : Object.keys(S.layouts)[0], Lc = structuredClone(S.layouts[key]);
+  state.sys = id; state.sysLayout = key;
+  state.sysColor = Lc.color || (color && S.colors[color] ? color : Object.keys(S.colors)[0]);
+  state.walls = Lc.walls; state.corner = Lc.corner; state.unitH = Lc.unitH; state.backing = true;
+}
+function sanitize(){
+  const S = SYSTEMS[state.sys]; if (!S){ state.sys = null; return; }
+  if (!S.colors[state.sysColor]) state.sysColor = Object.keys(S.colors)[0];
+  const H = state.room.H;
+  if (S.heights && !S.heights.includes(state.unitH)) state.unitH = S.heights.filter(h => h <= H).pop() || S.heights[0];
+  if (S.hRange) state.unitH = Math.max(S.hRange[0], Math.min(state.unitH, S.hRange[1], H-1));
+  for (const k of ['left','back','right']){
+    const c = state.walls[k];
+    c.depth = S.id === 'elvarli' && state.sysColor === 'bamboo' ? 20.125 : S.depths.reduce((a,b) => Math.abs(b-c.depth) < Math.abs(a-c.depth) ? b : a);
+    c.widths = c.bays.map((_,i) => c.widths && S.widths.includes(c.widths[i]) ? c.widths[i] : S.def);
+    c.bays = c.bays.map(b => b === 'empty' || allowed(S, c.depth, b) ? b : 'shelves');
+  }
+}
 const CLOTHES = ['#f4f1ea','#e7ddcd','#cdb89b','#a98f74','#7d8a94','#2f3a4c','#1f1f22','#59635a','#b9c4cc','#d9b9ae','#8c4a3c','#5f7fa3','#ffffff','#3e4a57'];
 const FOLDED  = ['#e9e2d6','#c9d2d6','#8898a6','#33405a','#d6c3a8','#70786b','#f6f4ef','#a66a55','#4a4a4e'];
 const SHOES   = ['#2a2522','#6b4a32','#e9e4dc','#b08a62','#1b2233','#8a8d90','#7a2e2a','#f4f4f2'];
@@ -291,19 +422,31 @@ function floorTex(id){
   }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return texCache['f'+id] = t;
 }
+function meshTex(){
+  if (texCache.mesh) return texCache.mesh;
+  const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0,0,256,64); g.strokeStyle = '#fff'; g.lineWidth = 3;
+  for (let x=0;x<=256;x+=16){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,64); g.stroke(); }
+  for (let y=0;y<=64;y+=16){ g.beginPath(); g.moveTo(0,y); g.lineTo(256,y); g.stroke(); }
+  return texCache.mesh = new THREE.CanvasTexture(c);
+}
 let M = {}, mats = [], texs = [];
 const keep = m => (mats.push(m), m);
 const clothCache = {};
 function cloth(col){ return clothCache[col] ||= new THREE.MeshStandardMaterial({color:col, roughness:.92}); }
 function makeMaterials(){
   mats.forEach(m => m.dispose()); mats = []; texs.forEach(t => t.dispose()); texs = [];
-  const f = FINISHES[state.finish], hw = HARDWARE[state.hardware], w = woodTex(state.finish);
+  const S = SYSTEMS[state.sys], col = S && (S.colors[state.sysColor] || Object.values(S.colors)[0]);
+  const fid = col ? col.panel : state.finish, f = FINISHES[fid], w = woodTex(fid);
+  const hw = col ? {color:col.metal, rough:.5, metal:.2} : HARDWARE[state.hardware];
   M.woodV = keep(new THREE.MeshStandardMaterial({map:w.v, roughness:f.rough}));
   M.woodH = keep(new THREE.MeshStandardMaterial({map:w.h, roughness:f.rough}));
   M.metal = keep(new THREE.MeshStandardMaterial({color:hw.color, roughness:hw.rough, metalness:hw.metal}));
   M.glass = keep(new THREE.MeshPhysicalMaterial({color:'#e3f1ee', roughness:.04, transmission:1, thickness:.5, ior:1.5}));
   M.frost = keep(new THREE.MeshPhysicalMaterial({color:'#f3f7f6', roughness:.55, transmission:.9, thickness:.6, ior:1.5}));
-  M.shelf = state.shelfMat==='glass' ? M.glass : state.shelfMat==='frosted' ? M.frost : M.woodH;
+  M.shelf = col ? keep(new THREE.MeshStandardMaterial({map:woodTex(col.shelf).h, roughness:FINISHES[col.shelf].rough}))
+          : state.shelfMat==='glass' ? M.glass : state.shelfMat==='frosted' ? M.frost : M.woodH;
+  M.mesh = keep(new THREE.MeshStandardMaterial({color:hw.color, alphaMap:meshTex(), alphaTest:.5, side:THREE.DoubleSide, roughness:.5}));
   const dg = {clear:['#dcebe8',.16,.04], frosted:['#f4f7f6',.62,.6], smoked:['#3b322b',.45,.05]}[state.doorGlass] || ['#dcebe8',.16,.04];
   M.door = keep(new THREE.MeshPhysicalMaterial({color:dg[0], transparent:true, opacity:dg[1], roughness:dg[2], depthWrite:false, envMapIntensity:1.6}));
   M.led  = keep(new THREE.MeshBasicMaterial({color:'#fff1d0'}));
@@ -327,28 +470,35 @@ let geos = [];
 /* ───────────────────────── build ───────────────────────── */
 let runs = {}, deco = {}, hits = [], stats = {}, dimGroup = null;
 const active = w => state.walls[w].bays.some(b => b !== 'empty');
+function runLen(w){
+  const c = state.walls[w], S = SYSTEMS[state.sys], n = c.bays.length;
+  return c.widths.slice(0,n).reduce((a,b) => a+b, 0) + (S.gap ? (n+1)*S.gap : 0);
+}
 function layout(){
-  const R = state.room, W = state.walls;
+  const R = state.room, W = state.walls, S = SYSTEMS[state.sys];
   const dl = active('left') ? W.left.depth : 0, dr = active('right') ? W.right.depth : 0, db = active('back') ? W.back.depth : 0;
   const sides = state.corner === 'sides', z0 = sides ? 0 : db;
+  const aL = R.D - W.left.setback - z0, aR = R.D - W.right.setback - z0, aB = sides ? R.W-dl-dr : R.W;
+  const len = (w, a) => S ? runLen(w) : a, Ll = len('left',aL), Lr = len('right',aR), Lb = len('back',aB);
   return {
-    left:  {L: R.D - W.left.setback - z0,  d: W.left.depth,  pos:[0,0,R.D - W.left.setback], rot: Math.PI/2},
-    right: {L: R.D - W.right.setback - z0, d: W.right.depth, pos:[R.W,0,z0], rot:-Math.PI/2, flip:true},
-    back:  {L: sides ? R.W-dl-dr : R.W, d: W.back.depth, pos:[sides?dl:0,0,0], rot:0},
+    left:  {L:Ll, avail:aL, d:W.left.depth,  pos:[0,0,R.D - W.left.setback], rot: Math.PI/2},
+    right: {L:Lr, avail:aR, d:W.right.depth, pos:[R.W,0,R.D - W.right.setback - Lr], rot:-Math.PI/2, flip:true},
+    back:  {L:Lb, avail:aB, d:W.back.depth,  pos:[(sides?dl:0) + Math.max(0,(aB-Lb)/2),0,0], rot:0},
   };
 }
+let lastLay = null;
 
 function rebuild(){
   content.traverse(o => { if (o.isSprite) { o.material.map.dispose(); o.material.dispose(); } });
   geos.forEach(g => g.dispose()); geos = []; content.clear(); hits = []; runs = {}; deco = {};
-  makeMaterials();
+  sanitize(); makeMaterials();
   const R = state.room; R.doorW = Math.max(0, R.W - R.doorL - R.doorR);
   content.position.set(-R.W/2, 0, -R.D/2);
   ceilLight.position.set(0, R.H-6, 0);
   buildRoom(R);
-  stats = {hang:0, shelf:0, drawers:0, shoes:0, eff:{left:0,right:0,back:0}};
+  stats = {hang:0, shelf:0, drawers:0, shoes:0, eff:{left:0,right:0,back:0}, parts:new Map()};
   const lights = new THREE.Group(); content.add(lights);
-  const lay = layout();
+  const lay = lastLay = layout();
   for (const w of ['left','back','right']){
     const g = buildRun(w, lay[w], lights);
     g.position.set(...lay[w].pos); g.rotation.y = lay[w].rot; content.add(g); runs[w] = g;
@@ -378,24 +528,49 @@ function buildRoom(R){
   if (R.doorR>3) B(deco.door, R.doorR-3, 4.5, .5, M.trim, W-(R.doorR-3)/2, 2.25, D-.25, false);
 }
 
-function buildRun(wall, lay, lights){
+function buildRun(wall, lay){
   const g = new THREE.Group(); g.userData.lightPos = [];
-  const cfg = state.walls[wall], n = cfg.bays.length, L = lay.L, d = lay.d, Hs = Math.min(state.unitH, state.room.H), t = .75;
+  const cfg = state.walls[wall], n = cfg.bays.length, L = lay.L, d = lay.d, t = .75;
+  const S = SYSTEMS[state.sys], style = S ? S.style : 'custom', Hs = Math.min(state.unitH, state.room.H);
   if (L < 8) return g;
-  const bw = L/n, idxOf = j => lay.flip ? n-1-j : j, typeAt = j => cfg.bays[idxOf(j)];
-  const px = []; for (let i=0;i<=n;i++) px.push(Math.min(Math.max(i*bw, t/2), L-t/2));
-  for (let i=0;i<=n;i++){
-    const need = (i>0 && typeAt(i-1)!=='empty') || (i<n && typeAt(i)!=='empty');
-    if (need) B(g, t, Hs, d, M.woodV, px[i], Hs/2, d/2);
+  const idxOf = j => lay.flip ? n-1-j : j, typeAt = j => cfg.bays[idxOf(j)], used = j => j >= 0 && j < n && typeAt(j) !== 'empty';
+  const add = (k, c=1) => stats.parts.set(k, (stats.parts.get(k)||0)+c);
+  const spans = [];
+  if (!S){
+    const bw = L/n, px = []; for (let i=0;i<=n;i++) px.push(Math.min(Math.max(i*bw, t/2), L-t/2));
+    for (let i=0;i<=n;i++) if (used(i-1) || used(i)) B(g, t, Hs, d, M.woodV, px[i], Hs/2, d/2);
+    for (let j=0;j<n;j++) spans.push({x0:j*bw, x1:(j+1)*bw, xa:px[j]+t/2, xb:px[j+1]-t/2});
+  } else {
+    const G = S.gap, H = state.room.H; let x = 0, railLen = 0;
+    const upright = xc => {
+      if (style === 'rail'){ B(g, 1, 78.75, .5, M.metal, xc, Hs-.4-39.375, .5, false); add('BOAXEL wall upright 78 3/4″'); }
+      else if (style === 'panel'){ B(g, .9, Hs, d, M.woodV, xc, Hs/2, d/2); add('AURDAL side panel with leg 15 3/4×87″'); }
+      else { B(g, 1.6, H, 1.6, M.metal, xc, H/2, 2); add('ELVARLI post 87 1/4–137 3/4″'); }
+    };
+    for (let j=0;j<n;j++){
+      const w = cfg.widths[idxOf(j)];
+      if (style === 'cabinet'){
+        if (used(j)){ B(g, .7, Hs, d, M.woodV, x+.35, Hs/2, d/2); B(g, .7, Hs, d, M.woodV, x+w-.35, Hs/2, d/2); add(S.parts.frame(w, d, Hs)); }
+        spans.push({x0:x, x1:x+w, xa:x+.7, xb:x+w-.7, w}); x += w;
+      } else {
+        if (used(j-1) || used(j)) upright(x+G/2);
+        spans.push({x0:x+G/2, x1:x+G+w+G/2, xa:x+G, xb:x+G+w, w});
+        if (used(j) && style === 'rail'){ B(g, w+G, 1.5, .5, M.metal, x+G+w/2, Hs-.2, .25, false); railLen += w+G; }
+        if (used(j) && style === 'panel'){ B(g, w+G, 1.2, .4, M.metal, x+G+w/2, Hs-4, .2, false); add('AURDAL suspension rail 25 5/8″'); }
+        x += G+w;
+        if (j === n-1 && used(j)) upright(x+G/2);
+      }
+    }
+    if (railLen) add('BOAXEL suspension rail 71 3/4″', Math.ceil(railLen/71.75));
   }
   for (let j=0;j<n;j++){
-    const idx = idxOf(j), type = typeAt(j);
+    const idx = idxOf(j), type = typeAt(j), sp = spans[j], bw = sp.x1-sp.x0, bx = (sp.x0+sp.x1)/2;
     if (type !== 'empty'){
-      buildBay(g, type, px[j]+t/2, px[j+1]-t/2, d, Hs, wall.charCodeAt(0)*131 + idx*17 + 7, wall);
-      if (state.led) g.userData.lightPos.push(new THREE.Vector3((j+.5)*bw, Hs*.6, d+4));
+      buildBay(g, type, sp.xa, sp.xb, d, Hs, wall.charCodeAt(0)*131 + idx*17 + 7, wall, style, sp.w);
+      if (state.led) g.userData.lightPos.push(new THREE.Vector3(bx, Hs*.6, d+4));
     }
     const hm = new THREE.MeshBasicMaterial({color:'#d98a3a', transparent:true, opacity:.14, depthWrite:false}); mats.push(hm);
-    const h = B(g, bw, Hs, d+.6, hm, (j+.5)*bw, Hs/2, d/2, false); h.receiveShadow = false; h.visible = false;
+    const h = B(g, bw, Hs, d+.6, hm, bx, Hs/2, d/2, false); h.receiveShadow = false; h.visible = false;
     h.userData = {wall, idx, run:g}; hits.push(h);
     if (sel.wall===wall && sel.idx===idx){
       const o = new THREE.LineSegments(EDGES, M.selLine); o.scale.set(bw-.3, Hs, d+.8); o.position.copy(h.position); o.renderOrder = 5; g.add(o);
@@ -404,21 +579,34 @@ function buildRun(wall, lay, lights){
   return g;
 }
 
-function buildBay(g, type, xa, xb, d, Hs, seed, wall){
-  const r = rng(seed), iw = xb-xa, cx = (xa+xb)/2, t = .75, yb = 4+t, yt = Hs-t, items = state.items, st = stats;
-  B(g, iw, t, d, M.woodH, cx, 4+t/2, d/2);
-  B(g, iw, t, d, M.woodH, cx, Hs-t/2, d/2);
-  B(g, iw, 4, t, M.woodH, cx, 2, d-2.5);
-  if (state.backing) B(g, iw, Hs-4, .25, M.woodV, cx, 4+(Hs-4)/2, .13);
+function buildBay(g, type, xa, xb, d, Hs, seed, wall, style, nomW){
+  const r = rng(seed), iw = xb-xa, cx = (xa+xb)/2, t = .75, items = state.items, st = stats;
+  const S = SYSTEMS[state.sys], open = style==='rail' || style==='panel' || style==='post', brk = style==='rail' || style==='post';
+  const part = (kind, c=1) => { const f = S && S.parts[kind]; if (f){ const k = f(nomW, d); st.parts.set(k, (st.parts.get(k)||0)+c); } };
+  let yb, yt;
+  if (!open){
+    B(g, iw, t, d, M.woodH, cx, 4+t/2, d/2);
+    B(g, iw, t, d, M.woodH, cx, Hs-t/2, d/2);
+    B(g, iw, 4, t, M.woodH, cx, 2, d-2.5);
+    if (state.backing) B(g, iw, Hs-4, .25, M.woodV, cx, 4+(Hs-4)/2, .13);
+    yb = 4+t; yt = Hs-t;
+  } else { yb = style === 'rail' ? Math.max(3, Hs-76.5) : 5; yt = Hs; }
   const rodZ = Math.min(Math.max(d/2, 11), d-1.5);
   st.eff[wall] = Math.max(st.eff[wall], d);
 
-  const shelf = (y, mat = M.shelf) => {
-    const wood = mat === M.woodH, th = wood ? t : .4;
-    B(g, iw-.1, th, d-.7, mat, cx, y, .35+(d-.7)/2, wood); st.shelf += iw;
+  const bracket = (y, len) => {
+    if (!brk) return;
+    B(g, .25, 1.3, len, M.metal, xa+.13, y, len/2+.4, false); B(g, .25, 1.3, len, M.metal, xb-.13, y, len/2+.4, false);
+    part('bracket', style === 'post' ? 1 : 2);
+  };
+  const shelf = (y, mat = M.shelf, kind = 'shelf') => {
+    const glass = !!mat.isMeshPhysicalMaterial, th = glass ? .4 : open ? .7 : t;
+    B(g, iw-.1, th, d-.7, mat, cx, y, .35+(d-.7)/2, !glass); st.shelf += iw; part(kind);
+    bracket(y-th/2-.65, d-1);
     if (state.led) B(g, iw-1.5, .12, .4, M.led, cx, y-th/2-.07, d-1.7, false);
     return y + th/2;
   };
+  if (open) yt = shelf(Hs-.35) - .9;                          // open systems get a top shelf; hang everything below it
   const stacks = (y, h) => {
     if (!items || h < 3.5) return;
     const sw = Math.min(11, iw-2), n = Math.max(1, Math.floor((iw-1)/(sw+1.6))), gap = (iw-n*sw)/(n+1), dd = Math.min(d-2.5, 12.5);
@@ -448,15 +636,17 @@ function buildBay(g, type, xa, xb, d, Hs, seed, wall){
       for (const s of [-2,2]){ const m = new THREE.Mesh(SHOE, mat); m.scale.set(1,hs,sc); m.position.set(x+s, y, d-1.2); m.castShadow = true; g.add(m); }
     }
   };
-  const levels = (y0, y1, pitch, fill, mat) => {            // shelves between y0..y1, fill(surfaceY, clearHeight) per level
+  const levels = (y0, y1, pitch, fill, mat, kind) => {      // shelves between y0..y1, fill(surfaceY, clearHeight) per level
+    if (open && y0 === yb) y0 = shelf(yb+.35, mat, kind);     // open systems have no cabinet floor, so start with a shelf
     const n = Math.max(1, Math.round((y1-y0)/pitch)), sp = (y1-y0)/n;
     fill(y0, sp-1);
-    for (let k=1;k<n;k++){ const top = shelf(y0+k*sp, mat); fill(top, sp-1.2); }
+    for (let k=1;k<n;k++){ const top = shelf(y0+k*sp, mat, kind); fill(top, sp-1.2); }
   };
-  const rod = (y, minLen, maxLen) => {
+  const rod = (y, minLen, maxLen, own) => {
     C(g, .55, iw, M.metal, cx, y, rodZ);
     C(g, 1.1, .35, M.metal, xa+.18, y, rodZ); C(g, 1.1, .35, M.metal, xb-.18, y, rodZ);
-    st.hang += iw; st.eff[wall] = Math.max(st.eff[wall], rodZ+10);
+    if (own) bracket(y+1.2, rodZ+1.2);
+    st.hang += iw; st.eff[wall] = Math.max(st.eff[wall], rodZ+10); part('rail');
     if (!items) return;
     let x = xa+1.7;
     while (x < xb-1.7){
@@ -470,36 +660,46 @@ function buildBay(g, type, xa, xb, d, Hs, seed, wall){
     }
   };
   const drawers = (y0, count, h) => {
+    st.drawers += count; part('drawer', count);
+    if (open){                                                // BOAXEL mesh baskets, AURDAL box drawers
+      const mesh = style === 'rail', bh = mesh ? 5.875 : 6.5, pitch = mesh ? 8.2 : 7.3;
+      for (let k=0;k<count;k++){
+        const y = y0 + pitch*k + bh/2 + .6;
+        if (mesh){ B(g, iw-.4, bh, d-.8, M.mesh, cx, y, d/2+.1, false).receiveShadow = false; bracket(y-bh/2+.5, d-1); }
+        else B(g, iw-.4, bh, d-.3, M.shelf, cx, y, d/2+.2);
+      }
+      return shelf(y0 + pitch*count + 1.2);
+    }
     for (let k=0;k<count;k++){
       const y = y0+h*(k+.5), hl = Math.min(iw*.38, 9);
       B(g, iw-.2, h-.2, t, M.woodH, cx, y, d-t/2);
+      if (S) continue;                                        // KOMPLEMENT drawers sit behind the frame edge and have no pulls
       C(g, .22, hl, M.metal, cx, y+h*.18, d+.85);
       B(g, .3, .3, .85, M.metal, cx-hl*.36, y+h*.18, d+.42, false); B(g, .3, .3, .85, M.metal, cx+hl*.36, y+h*.18, d+.42, false);
     }
-    st.drawers += count;
     B(g, iw, t, d, M.woodH, cx, y0+count*h+t/2, d/2);
     return y0+count*h+t;
   };
 
   if (type === 'double'){
     const top = yt-2.6, low = yb+(yt-yb)/2-1.5;
-    rod(top, Math.min(26, top-low-6), top-low-5); rod(low, Math.min(26, low-yb-5), Math.min(36, low-yb-3));
+    rod(top, Math.min(26, top-low-6), top-low-5); rod(low, Math.min(26, low-yb-5), Math.min(36, low-yb-3), true);
   } else if (type === 'long'){
     const sy = yt-12, top = shelf(sy); stacks(top, 11);
     rod(sy-3.2, Math.min(44, sy-yb-10), Math.min(60, sy-yb-6));
   } else if (type === 'hangShelves'){
     const ry = yt-2.6, sy = Math.max(yb+20, ry-42);
-    rod(ry, 27, Math.min(37, ry-sy-3)); const top = shelf(sy);
-    levels(yb, sy-t/2, 11.5, stacks); void top;
+    rod(ry, 27, Math.min(37, ry-sy-3)); shelf(sy);
+    levels(yb, sy-t/2, 11.5, stacks);
   } else if (type === 'hangDrawers'){
-    const ry = yt-2.6, n = Math.max(2, Math.min(4, Math.floor((ry-42-yb)/8.2)+1)), dh = Math.min(9, (ry-40-yb)/n);
-    drawers(yb, n, Math.max(6.5, dh)); rod(ry, 27, Math.min(37, ry-(yb+n*Math.max(6.5,dh))-5));
+    const ry = yt-2.6, n = Math.max(2, Math.min(4, Math.floor((ry-42-yb)/8.2)+1)), dh = Math.max(6.5, Math.min(9, (ry-40-yb)/n));
+    const top = drawers(yb, n, dh); rod(ry, 27, Math.min(37, ry-top-4));
   } else if (type === 'shelves'){
     levels(yb, yt, 12.5, stacks);
   } else if (type === 'drawers'){
     const top = drawers(yb, 4, 8.4); levels(top, yt, 12, stacks);
   } else if (type === 'shoes'){
-    levels(yb, yt, 7.6, y => shoeRow(y));
+    levels(yb, yt, 7.6, y => shoeRow(y), undefined, 'shoe');
   } else if (type === 'display'){
     const top = drawers(yb, 2, 8.6);
     levels(top, yt, 15, bags, state.shelfMat === 'frosted' ? M.frost : M.glass);
@@ -626,55 +826,88 @@ const tog = (k, l) => `<label class="tog">${l}<input type="checkbox" data-k="${k
 const wallName = {left:'Left wall', back:'Back wall', right:'Right wall'};
 
 function renderPanel(){
-  const R = state.room, w = state.walls[tab], lay = layout()[tab], side = tab !== 'back';
+  const R = state.room, w = state.walls[tab], lays = layout(), lay = lays[tab], side = tab !== 'back', S = SYSTEMS[state.sys];
   if (sel.wall === tab && sel.idx >= w.bays.length) sel.idx = w.bays.length-1;
   const cur = sel.wall === tab ? w.bays[sel.idx] : null;
   const min = document.getElementById('app').classList.contains('min');
   panel.dataset.m = msec;
+  const ikeaSw = S ? `<div class="sw">${Object.entries(S.colors).map(([id,c]) => `<button title="${c.name}" aria-label="${c.name}" data-icol="${id}" class="${state.sysColor===id?'on':''}" style="background:linear-gradient(135deg,${FINISHES[c.panel].base} 50%,${FINISHES[c.shelf].base} 50%)"></button>`).join('')}</div>` : '';
+  const sizes = S ? `Section widths ${S.widths.map(frac).join(', ')}″ · depth ${S.depths.map(frac).join(' or ')}″ · ${S.heights ? 'height '+S.heights.map(frac).join(' or ')+'″' : S.style==='post' ? 'posts fit ceilings 87 1/4 to 137 3/4″' : 'uprights 78 3/4″ long'}` : '';
+  const clear = S && S.id === 'pax' ? `<p class="note">${frac(state.unitH)}″ frames leave ${inch(R.H-state.unitH)} under your ${inch(R.H)} ceiling. Check the minimum ceiling height on the frame's IKEA page before buying.</p>` : '';
+  const card = S ? `<div class="icard">
+      <p>${S.blurb}</p>
+      <div class="lbl">Layout for this closet</div>
+      <div class="seg">${Object.entries(S.layouts).map(([k,l]) => `<button data-ilay="${k}" class="${state.sysLayout===k?'on':''}">${l.label}</button>`).join('')}</div>
+      <div class="lbl">Color <span>${S.colors[state.sysColor].name}</span></div>${ikeaSw}
+      <div class="lbl">Sizes sold</div><p>${sizes}</p>${S.notes ? `<p>${S.notes}</p>` : ''}${clear}
+      <div class="lbl">Prices on ikea.com <span>seen Nov 16, 2026</span></div>
+      <ul class="plist">${S.prices.map(([n,p]) => `<li><span>${n}</span><b>${p}</b></li>`).join('')}</ul>
+      <div class="links"><a href="${S.url}" target="_blank" rel="noopener">${S.name} on ikea.com</a><a href="${STORE.url}" target="_blank" rel="noopener">${STORE.name} store</a></div>
+      <p class="note" style="margin:0 0 10px">Nearest store to Coral Springs: ${STORE.name}, ${STORE.addr}. Stock changes daily, so check each item's page for that store.</p>
+      <button data-nosys>Switch back to custom cabinetry</button>
+    </div>` : '';
+  const heightCtl = !S ? `<div class="lbl">Cabinet height <span><output>${state.unitH}</output>″ of ${inch(R.H)}</span></div>
+    <input type="range" min="66" max="${Math.floor(R.H)}" step="1" value="${Math.min(state.unitH,R.H)}" data-k="unitH" aria-label="Cabinet height">`
+    : S.hRange ? `<div class="lbl">${S.style==='rail'?'Wall rail height':'Top shelf height'} <span><output>${state.unitH}</output>″</span></div>
+    <input type="range" min="${S.hRange[0]}" max="${Math.min(S.hRange[1], Math.floor(R.H)-1)}" step="1" value="${state.unitH}" data-k="unitH" aria-label="Height">`
+    : `<div class="lbl">${S.name} height</div>${seg('unitH', S.heights.map(v => [v, frac(v)+'″']), state.unitH, true)}`;
+  const depthCtl = `<div class="lbl">${S ? S.name+' depth' : 'Cabinet depth'}</div>` + seg(`walls.${tab}.depth`, (S ? S.depths : [12,14,16,20,24]).map(v => [v, frac(v)+'″']), w.depth, true);
+  const widthCtl = S && cur != null && S.widths.length > 1 ? `<div class="lbl">Section ${sel.idx+1} width</div><div class="seg">${S.widths.map(v => `<button data-width="${v}" class="${w.widths[sel.idx]===v?'on':''}">${frac(v)}″</button>`).join('')}</div>` : '';
+  const parts = S ? [...stats.parts].sort((a,b) => a[0].localeCompare(b[0])) : [];
+  const showPrice = n => PRICES[n] && (state.sysColor === Object.keys(S.colors)[0] || n.startsWith('ELVARLI')) ? '$'+PRICES[n]+' each' : '';
   panel.innerHTML = `
   <nav class="mnav">${[['looks','Looks'],['finish','Finishes'],['layout','Layout'],['details','More']].map(([k,l]) => `<button data-msec="${k}" class="${msec===k&&!min?'on':''}">${l}</button>`).join('')}<button class="col" data-min aria-label="${min?'Show':'Hide'} controls">${min?'⌃':'⌄'}</button></nav>
   <h1>Closet Studio</h1>
-  <div class="sub">${inch(R.W)} wide · ${inch(R.D)} deep · ${inch(R.H)} high · ${inch(R.doorW)} door</div>
+  <div class="sub">${inch(R.W)} wide · ${inch(R.D)} deep · ${inch(R.H)} high · ${inch(R.doorW)} door${S ? ' · IKEA '+S.name : ''}</div>
 
   <section class="s-looks"><h2>Start from a look</h2>
     <div class="presets">${Object.entries(PRESETS).map(([id,p]) => `<button data-preset="${id}">${p.label}<small>${p.sub}</small></button>`).join('')}</div>
+    <div class="lbl">IKEA systems <span>real sizes, sold at ${STORE.name}</span></div>
+    <div class="ikea">${Object.values(SYSTEMS).map(x => `<button data-isys="${x.id}" class="${state.sys===x.id?'on':''}">${x.name}<small>${x.tag}</small></button>`).join('')}</div>
+    ${card}
   </section>
 
   <section class="s-finish"><h2>Finishes</h2>
+    ${S ? `<div class="lbl">${S.name} color <span>${S.colors[state.sysColor].name}</span></div>${ikeaSw}
+    <div class="note">Only the finishes IKEA lists for ${S.name} are offered here. Switch back to custom cabinetry on the Looks tab for wood, glass and metal choices.</div>` : `
     <div class="lbl">Cabinetry <span>${FINISHES[state.finish].name}</span></div>
-    <div class="sw sq">${Object.entries(FINISHES).map(([id,f]) => `<button title="${f.name}" aria-label="${f.name}" data-k="finish" data-v="${id}" class="${state.finish===id?'on':''}" style="background:linear-gradient(100deg,${f.base},${f.light} 55%,${f.base})"></button>`).join('')}</div>
+    <div class="sw sq">${Object.entries(FINISHES).filter(([,f]) => !f.sys).map(([id,f]) => `<button title="${f.name}" aria-label="${f.name}" data-k="finish" data-v="${id}" class="${state.finish===id?'on':''}" style="background:linear-gradient(100deg,${f.base},${f.light} 55%,${f.base})"></button>`).join('')}</div>
     <div class="lbl">Shelves</div>
     ${seg('shelfMat', [['wood','Wood'],['glass','Clear glass'],['frosted','Frosted glass']], state.shelfMat)}
     <div class="lbl">Display-cabinet doors</div>
     ${seg('doorGlass', [['clear','Clear'],['frosted','Frosted'],['smoked','Smoked']], state.doorGlass)}
     <div class="lbl">Rods &amp; handles <span>${HARDWARE[state.hardware].name}</span></div>
-    <div class="sw">${Object.entries(HARDWARE).map(([id,h]) => `<button title="${h.name}" aria-label="${h.name}" data-k="hardware" data-v="${id}" class="${state.hardware===id?'on':''}" style="background:radial-gradient(circle at 30% 30%,#fff8,${h.color} 60%)"></button>`).join('')}</div>
+    <div class="sw">${Object.entries(HARDWARE).map(([id,h]) => `<button title="${h.name}" aria-label="${h.name}" data-k="hardware" data-v="${id}" class="${state.hardware===id?'on':''}" style="background:radial-gradient(circle at 30% 30%,#fff8,${h.color} 60%)"></button>`).join('')}</div>`}
     <div class="lbl">Wall paint</div>
     <div class="sw">${Object.entries(WALLS).map(([id,c]) => `<button title="${id}" aria-label="${id} walls" data-k="wall" data-v="${id}" class="${state.wall===id?'on':''}" style="background:${c}"></button>`).join('')}</div>
     <div class="lbl">Floor</div>
     ${seg('floor', Object.entries(FLOORS), state.floor)}
   </section>
 
-  <section id="layout" class="s-layout"><h2>Layout</h2>
-    <div class="tabs">${['left','back','right'].map(k => `<button data-tab="${k}" class="${tab===k?'on':''}">${wallName[k]}<small>${active(k) ? Math.round(layout()[k].L)+'″ run' : 'empty'}</small></button>`).join('')}</div>
-    <div class="lbl">Sections <span>${side ? '1 is nearest the door' : 'left to right'} · ${inch(lay.L/w.bays.length)} each</span></div>
-    <div class="strip">${w.bays.map((b,i) => `<button data-sel="${i}" class="${sel.wall===tab&&sel.idx===i?'on':''}" title="${MODULES[b]}">${icon(b)}${i+1}</button>`).join('')}</div>
+  <section id="layout" class="s-layout"><h2>Layout${S ? ' · IKEA '+S.name : ''}</h2>
+    <div class="tabs">${['left','back','right'].map(k => `<button data-tab="${k}" class="${tab===k?'on':''}">${wallName[k]}<small>${active(k) ? Math.round(lays[k].L)+'″ run' : 'empty'}</small></button>`).join('')}</div>
+    <div class="lbl">Sections <span>${side ? '1 is nearest the door' : 'left to right'} · ${S ? `${inch(lay.L)} of ${inch(lay.avail)} used` : inch(lay.L/w.bays.length)+' each'}</span></div>
+    <div class="strip">${w.bays.map((b,i) => `<button data-sel="${i}" class="${sel.wall===tab&&sel.idx===i?'on':''}" title="${MODULES[b]}">${icon(b)}${S ? frac(w.widths[i])+'″' : i+1}</button>`).join('')}</div>
     <div class="lbl">${cur ? `Section ${sel.idx+1} is` : 'Pick a section above'} <span>${cur ? MODULES[cur] : ''}</span></div>
-    <div class="mods">${Object.entries(MODULES).map(([id,n]) => `<button data-mod="${id}" class="${cur===id?'on':''}" ${cur?'':'disabled'}>${icon(id)}${n}</button>`).join('')}</div>
+    <div class="mods">${Object.entries(MODULES).filter(([id]) => !S || id !== 'display').map(([id,n]) => `<button data-mod="${id}" class="${cur===id?'on':''}" ${cur && (id==='empty' || allowed(S, w.depth, id)) ? '' : 'disabled style="opacity:.35"'}>${icon(id)}${n}</button>`).join('')}</div>
+    ${widthCtl}
     <div class="lbl">Number of sections</div>
     <div class="step"><button data-bays="-1" aria-label="Fewer sections">−</button><b>${w.bays.length}</b><button data-bays="1" aria-label="More sections">+</button></div>
-    <div class="lbl">Cabinet depth</div>
-    ${seg(`walls.${tab}.depth`, [12,14,16,20,24].map(v => [v, v+'″']), w.depth, true)}
+    ${depthCtl}
     ${side ? `<div class="lbl">Start back from door wall <span><output>${w.setback}</output>″</span></div>
     <input type="range" min="0" max="48" step="1" value="${w.setback}" data-k="walls.${tab}.setback" aria-label="Setback from door wall">` : ''}
-    <div class="lbl">Cabinet height <span><output>${state.unitH}</output>″ of ${inch(R.H)}</span></div>
-    <input type="range" min="66" max="${Math.floor(R.H)}" step="1" value="${Math.min(state.unitH,R.H)}" data-k="unitH" aria-label="Cabinet height">
+    ${heightCtl}
     <div class="lbl">Who gets the back corners</div>
     ${seg('corner', [['back','Back wall runs full width'],['sides','Side walls run full depth']], state.corner)}
   </section>
 
+  ${S ? `<section class="s-details"><h2>IKEA parts in this layout</h2>
+    <ul class="plist">${parts.map(([n,c]) => `<li><span>${c} × ${n}</span><b>${showPrice(n)}</b></li>`).join('')}</ul>
+    <div class="note">Counted from the 3D model as a starting list. Fixings, feet and lighting are not included. A price appears only where that exact size was seen on ikea.com on Nov 16, 2026 (white finish). Confirm everything in IKEA's own planner before ordering.</div>
+  </section>` : ''}
+
   <section class="s-details"><h2>Details</h2>
-    ${tog('led','LED shelf lighting')}${tog('items','Show clothes &amp; accessories')}${tog('backing','Wood back panels')}${tog('dims','Room dimensions')}
+    ${tog('led','LED shelf lighting')}${tog('items','Show clothes &amp; accessories')}${S ? '' : tog('backing','Wood back panels')}${tog('dims','Room dimensions')}
   </section>
 
   <section class="s-details"><details><summary><h2>Room measurements</h2></summary>
@@ -696,6 +929,8 @@ function renderHud(){
     const over = e[w] - ret;
     if (over > .5 && state.walls[w].setback < e[w]*.6) msgs.push(['', `${wallName[w]} sticks ${inch(over)} into the doorway. Start it further back from the door wall or make it shallower.`]);
   }
+  if (state.sys) for (const k of ['left','back','right']) if (active(k) && lastLay[k].L > lastLay[k].avail + .5)
+    msgs.push(['bad', `${wallName[k]} sections add up to ${inch(lastLay[k].L)}, which is ${inch(lastLay[k].L-lastLay[k].avail)} more than fits. Remove a section or choose narrower ones.`]);
   if (aisle < 24) msgs.push([aisle<20?'bad':'', `Walkway is ${inch(aisle)} with clothes hanging. 24″ or more is easier to move in.`]);
   if (!msgs.length && stats.hang) msgs.push(['ok','Doorway is clear and the walkway is workable.']);
   const ft = v => (v/12).toFixed(1)+' ft';
@@ -724,12 +959,17 @@ panel.addEventListener('click', ev => {
     else prompt('Copy this link', url);
     return;
   }
-  if (d.preset){ Object.assign(state, structuredClone(PRESETS[d.preset])); delete state.label; delete state.sub; state.unitH = Math.min(state.unitH, state.room.H); sel = {wall:'left', idx:0}; tab = 'left'; }
+  if (d.preset){ state.sys = null; Object.assign(state, structuredClone(PRESETS[d.preset])); delete state.label; delete state.sub; state.unitH = Math.min(state.unitH, state.room.H); sel = {wall:'left', idx:0}; tab = 'left'; }
   else if (d.tab){ tab = d.tab; sel = {wall:tab, idx:0}; }
   else if (d.sel){ sel = {wall:tab, idx:+d.sel}; }
   else if (d.mod){ state.walls[tab].bays[sel.idx] = d.mod; }
+  else if (d.isys){ applySystem(d.isys); sel = {wall:'left', idx:0}; tab = 'left'; }
+  else if (d.ilay){ applySystem(state.sys, d.ilay, state.sysColor); sel = {wall:'left', idx:0}; tab = 'left'; }
+  else if (d.icol){ state.sysColor = d.icol; }
+  else if (d.width){ state.walls[tab].widths[sel.idx] = +d.width; }
+  else if ('nosys' in d){ state.sys = null; state.unitH = Math.min(84, Math.floor(state.room.H)); for (const k in state.walls){ const c = state.walls[k]; c.depth = [12,14,16,20,24].reduce((a,b) => Math.abs(b-c.depth) < Math.abs(a-c.depth) ? b : a); } }
   else if (d.bays){ const a = state.walls[tab].bays, max = tab==='back' ? 4 : 6; if (+d.bays > 0 && a.length < max) a.push('shelves'); if (+d.bays < 0 && a.length > 1) a.pop(); }
-  else if (d.k){ setPath(d.k, 'n' in d ? +d.v : d.v); }
+  else if (d.k){ setPath(d.k, 'n' in d ? +d.v : d.v); if (state.sys === 'elvarli' && d.k.endsWith('depth') && +d.v < 20) state.sysColor = 'white'; }
   else if ('reset' in d){ state = Object.assign({room:{...DEFAULT_ROOM}, items:true, dims:true, backing:true}, structuredClone(PRESETS.boutique)); sel = {wall:'left', idx:0}; tab = 'left'; }
   else if ('shot' in d){
     renderer.render(scene, camera);
