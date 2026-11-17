@@ -93,7 +93,9 @@
   .ikea button.on{background:var(--ink);color:#fff;border-color:var(--ink)} .ikea button.on small{color:#cfc8bf}
   .icard{margin-top:10px;padding:12px 12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
   .icard p{margin:0 0 4px;font-size:12.5px;color:#5d554d}
-  .icard>button{width:100%;padding:10px;font-size:12.5px}
+  .icard>button,button.wide{width:100%;padding:10px;font-size:12.5px}
+  button.wide{margin-top:8px}
+  .strip i{font-style:normal;font-size:9.5px;color:var(--mute)}
   .plist{list-style:none;margin:0;padding:0;font-size:12.5px}
   .plist li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
   .plist li:last-child{border:0} .plist b{white-space:nowrap}
@@ -123,6 +125,7 @@
     .presets small{font-size:13px;margin:0}
     .seg button{min-height:42px;font-size:13px}
     .ikea{grid-template-columns:repeat(2,1fr)} .ikea button{min-height:54px;font-size:14px} .ikea small{font-size:12px}
+    button.wide{min-height:44px}
     .links a{min-height:44px;display:flex;align-items:center;justify-content:center} .icard>button{min-height:44px}
     .sw{gap:11px} .sw button{width:44px;height:44px} .sw.sq button{width:48px}
     .tabs button{min-height:48px}
@@ -303,9 +306,12 @@ function sanitize(){
   if (S.hRange) state.unitH = Math.max(S.hRange[0], Math.min(state.unitH, S.hRange[1], H-1));
   for (const k of ['left','back','right']){
     const c = state.walls[k];
-    c.depth = S.id === 'elvarli' && state.sysColor === 'bamboo' ? 20.125 : S.depths.reduce((a,b) => Math.abs(b-c.depth) < Math.abs(a-c.depth) ? b : a);
+    const near = S.depths.reduce((a,b) => Math.abs(b-c.depth) < Math.abs(a-c.depth) ? b : a), bamboo = S.id === 'elvarli' && state.sysColor === 'bamboo';
+    c.depths = c.bays.map((_,i) => bamboo ? 20.125 : c.depths && S.depths.includes(c.depths[i]) ? c.depths[i] : near);
     c.widths = c.bays.map((_,i) => c.widths && S.widths.includes(c.widths[i]) ? c.widths[i] : S.def);
-    c.bays = c.bays.map(b => b === 'empty' || allowed(S, c.depth, b) ? b : 'shelves');
+    c.bays = c.bays.map((b,i) => b === 'empty' || allowed(S, c.depths[i], b) ? b : 'shelves');
+    const usedD = c.depths.filter((_,i) => c.bays[i] !== 'empty');
+    c.depth = Math.max(...(usedD.length ? usedD : c.depths));            // the wall takes up as much room as its deepest section
   }
 }
 const CLOTHES = ['#f4f1ea','#e7ddcd','#cdb89b','#a98f74','#7d8a94','#2f3a4c','#1f1f22','#59635a','#b9c4cc','#d9b9ae','#8c4a3c','#5f7fa3','#ffffff','#3e4a57'];
@@ -534,6 +540,7 @@ function buildRun(wall, lay){
   const S = SYSTEMS[state.sys], style = S ? S.style : 'custom', Hs = Math.min(state.unitH, state.room.H);
   if (L < 8) return g;
   const idxOf = j => lay.flip ? n-1-j : j, typeAt = j => cfg.bays[idxOf(j)], used = j => j >= 0 && j < n && typeAt(j) !== 'empty';
+  const dOf = j => S && cfg.depths ? cfg.depths[idxOf(j)] : d;
   const add = (k, c=1) => stats.parts.set(k, (stats.parts.get(k)||0)+c);
   const spans = [];
   if (!S){
@@ -550,7 +557,7 @@ function buildRun(wall, lay){
     for (let j=0;j<n;j++){
       const w = cfg.widths[idxOf(j)];
       if (style === 'cabinet'){
-        if (used(j)){ B(g, .7, Hs, d, M.woodV, x+.35, Hs/2, d/2); B(g, .7, Hs, d, M.woodV, x+w-.35, Hs/2, d/2); add(S.parts.frame(w, d, Hs)); }
+        if (used(j)){ const dj = dOf(j); B(g, .7, Hs, dj, M.woodV, x+.35, Hs/2, dj/2); B(g, .7, Hs, dj, M.woodV, x+w-.35, Hs/2, dj/2); add(S.parts.frame(w, dj, Hs)); }
         spans.push({x0:x, x1:x+w, xa:x+.7, xb:x+w-.7, w}); x += w;
       } else {
         if (used(j-1) || used(j)) upright(x+G/2);
@@ -564,16 +571,16 @@ function buildRun(wall, lay){
     if (railLen) add('BOAXEL suspension rail 71 3/4″', Math.ceil(railLen/71.75));
   }
   for (let j=0;j<n;j++){
-    const idx = idxOf(j), type = typeAt(j), sp = spans[j], bw = sp.x1-sp.x0, bx = (sp.x0+sp.x1)/2;
+    const idx = idxOf(j), type = typeAt(j), sp = spans[j], bw = sp.x1-sp.x0, bx = (sp.x0+sp.x1)/2, dj = dOf(j);
     if (type !== 'empty'){
-      buildBay(g, type, sp.xa, sp.xb, d, Hs, wall.charCodeAt(0)*131 + idx*17 + 7, wall, style, sp.w);
-      if (state.led) g.userData.lightPos.push(new THREE.Vector3(bx, Hs*.6, d+4));
+      buildBay(g, type, sp.xa, sp.xb, dj, Hs, wall.charCodeAt(0)*131 + idx*17 + 7, wall, style, sp.w);
+      if (state.led) g.userData.lightPos.push(new THREE.Vector3(bx, Hs*.6, dj+4));
     }
     const hm = new THREE.MeshBasicMaterial({color:'#d98a3a', transparent:true, opacity:.14, depthWrite:false}); mats.push(hm);
-    const h = B(g, bw, Hs, d+.6, hm, bx, Hs/2, d/2, false); h.receiveShadow = false; h.visible = false;
+    const h = B(g, bw, Hs, dj+.6, hm, bx, Hs/2, dj/2, false); h.receiveShadow = false; h.visible = false;
     h.userData = {wall, idx, run:g}; hits.push(h);
     if (sel.wall===wall && sel.idx===idx){
-      const o = new THREE.LineSegments(EDGES, M.selLine); o.scale.set(bw-.3, Hs, d+.8); o.position.copy(h.position); o.renderOrder = 5; g.add(o);
+      const o = new THREE.LineSegments(EDGES, M.selLine); o.scale.set(bw-.3, Hs, dj+.8); o.position.copy(h.position); o.renderOrder = 5; g.add(o);
     }
   }
   return g;
@@ -851,7 +858,12 @@ function renderPanel(){
     : S.hRange ? `<div class="lbl">${S.style==='rail'?'Wall rail height':'Top shelf height'} <span><output>${state.unitH}</output>″</span></div>
     <input type="range" min="${S.hRange[0]}" max="${Math.min(S.hRange[1], Math.floor(R.H)-1)}" step="1" value="${state.unitH}" data-k="unitH" aria-label="Height">`
     : `<div class="lbl">${S.name} height</div>${seg('unitH', S.heights.map(v => [v, frac(v)+'″']), state.unitH, true)}`;
-  const depthCtl = `<div class="lbl">${S ? S.name+' depth' : 'Cabinet depth'}</div>` + seg(`walls.${tab}.depth`, (S ? S.depths : [12,14,16,20,24]).map(v => [v, frac(v)+'″']), w.depth, true);
+  const secD = S && cur != null ? w.depths[sel.idx] : null;
+  const depthCtl = !S ? `<div class="lbl">Cabinet depth</div>` + seg(`walls.${tab}.depth`, [12,14,16,20,24].map(v => [v, frac(v)+'″']), w.depth, true)
+    : S.depths.length < 2 ? `<div class="lbl">${S.name} depth <span>${frac(S.depths[0])}″ is the only depth IKEA sells</span></div>`
+    : cur == null ? '' : `<div class="lbl">Section ${sel.idx+1} depth <span>each section can differ</span></div>
+    <div class="seg">${S.depths.map(v => `<button data-sdepth="${v}" class="${secD===v?'on':''}">${frac(v)}″</button>`).join('')}</div>
+    <button class="wide" data-sdepthall="${secD}">Use ${frac(secD)}″ for every section on this wall</button>`;
   const widthCtl = S && cur != null && S.widths.length > 1 ? `<div class="lbl">Section ${sel.idx+1} width</div><div class="seg">${S.widths.map(v => `<button data-width="${v}" class="${w.widths[sel.idx]===v?'on':''}">${frac(v)}″</button>`).join('')}</div>` : '';
   const parts = S ? [...stats.parts].sort((a,b) => a[0].localeCompare(b[0])) : [];
   const showPrice = n => PRICES[n] && (state.sysColor === Object.keys(S.colors)[0] || n.startsWith('ELVARLI')) ? '$'+PRICES[n]+' each' : '';
@@ -887,13 +899,14 @@ function renderPanel(){
   <section id="layout" class="s-layout"><h2>Layout${S ? ' · IKEA '+S.name : ''}</h2>
     <div class="tabs">${['left','back','right'].map(k => `<button data-tab="${k}" class="${tab===k?'on':''}">${wallName[k]}<small>${active(k) ? Math.round(lays[k].L)+'″ run' : 'empty'}</small></button>`).join('')}</div>
     <div class="lbl">Sections <span>${side ? '1 is nearest the door' : 'left to right'} · ${S ? `${inch(lay.L)} of ${inch(lay.avail)} used` : inch(lay.L/w.bays.length)+' each'}</span></div>
-    <div class="strip">${w.bays.map((b,i) => `<button data-sel="${i}" class="${sel.wall===tab&&sel.idx===i?'on':''}" title="${MODULES[b]}">${icon(b)}${S ? frac(w.widths[i])+'″' : i+1}</button>`).join('')}</div>
+    <div class="strip">${w.bays.map((b,i) => `<button data-sel="${i}" class="${sel.wall===tab&&sel.idx===i?'on':''}" title="${MODULES[b]}">${icon(b)}${S ? frac(w.widths[i])+'″'+(S.depths.length > 1 ? `<br><i>${frac(w.depths[i])}″ deep</i>` : '') : i+1}</button>`).join('')}</div>
     <div class="lbl">${cur ? `Section ${sel.idx+1} is` : 'Pick a section above'} <span>${cur ? MODULES[cur] : ''}</span></div>
-    <div class="mods">${Object.entries(MODULES).filter(([id]) => !S || id !== 'display').map(([id,n]) => `<button data-mod="${id}" class="${cur===id?'on':''}" ${cur && (id==='empty' || allowed(S, w.depth, id)) ? '' : 'disabled style="opacity:.35"'}>${icon(id)}${n}</button>`).join('')}</div>
+    <div class="mods">${Object.entries(MODULES).filter(([id]) => !S || id !== 'display').map(([id,n]) => `<button data-mod="${id}" class="${cur===id?'on':''}" ${cur && (id==='empty' || allowed(S, S ? w.depths[sel.idx] : w.depth, id)) ? '' : 'disabled style="opacity:.35"'}>${icon(id)}${n}</button>`).join('')}</div>
     ${widthCtl}
+    ${S ? depthCtl : ''}
     <div class="lbl">Number of sections</div>
     <div class="step"><button data-bays="-1" aria-label="Fewer sections">−</button><b>${w.bays.length}</b><button data-bays="1" aria-label="More sections">+</button></div>
-    ${depthCtl}
+    ${S ? '' : depthCtl}
     ${side ? `<div class="lbl">Start back from door wall <span><output>${w.setback}</output>″</span></div>
     <input type="range" min="0" max="48" step="1" value="${w.setback}" data-k="walls.${tab}.setback" aria-label="Setback from door wall">` : ''}
     ${heightCtl}
@@ -967,6 +980,11 @@ panel.addEventListener('click', ev => {
   else if (d.ilay){ applySystem(state.sys, d.ilay, state.sysColor); sel = {wall:'left', idx:0}; tab = 'left'; }
   else if (d.icol){ state.sysColor = d.icol; }
   else if (d.width){ state.walls[tab].widths[sel.idx] = +d.width; }
+  else if (d.sdepth || d.sdepthall){
+    const v = +(d.sdepth || d.sdepthall), c = state.walls[tab];
+    if (state.sys === 'elvarli' && v < 20) state.sysColor = 'white';      // bamboo shelves only come 20 1/8 deep
+    if (d.sdepthall) c.depths = c.depths.map(() => v); else c.depths[sel.idx] = v;
+  }
   else if ('nosys' in d){ state.sys = null; state.unitH = Math.min(84, Math.floor(state.room.H)); for (const k in state.walls){ const c = state.walls[k]; c.depth = [12,14,16,20,24].reduce((a,b) => Math.abs(b-c.depth) < Math.abs(a-c.depth) ? b : a); } }
   else if (d.bays){ const a = state.walls[tab].bays, max = tab==='back' ? 4 : 6; if (+d.bays > 0 && a.length < max) a.push('shelves'); if (+d.bays < 0 && a.length > 1) a.pop(); }
   else if (d.k){ setPath(d.k, 'n' in d ? +d.v : d.v); if (state.sys === 'elvarli' && d.k.endsWith('depth') && +d.v < 20) state.sysColor = 'white'; }
