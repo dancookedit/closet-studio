@@ -101,6 +101,18 @@
   .plist li:last-child{border:0} .plist b{white-space:nowrap}
   .links{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 10px}
   .links a{flex:1;text-align:center;padding:10px 8px;border:1px solid var(--line);border-radius:9px;color:var(--ink);text-decoration:none;font-weight:600;font-size:12.5px;white-space:nowrap}
+  button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+  #shop{border:0;border-radius:16px;padding:18px;width:min(520px,calc(100vw - 24px));max-height:min(86dvh,760px);color:var(--ink);background:var(--panel);box-shadow:0 20px 60px rgba(40,25,10,.3)}
+  #shop::backdrop{background:rgba(40,30,20,.45)}
+  .shead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .shead h3{margin:0;font:600 19px Georgia,serif} .shead span{font-size:12.5px;color:var(--mute)}
+  .shead button{width:40px;height:40px;font-size:22px;line-height:1;padding:0;flex:none}
+  .srows{margin:10px 0 4px}
+  .srows a{display:flex;align-items:center;gap:12px;padding:10px 4px;min-height:52px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:13.5px}
+  .srows a:hover{background:#f3eee7}
+  .srows b{min-width:34px;font-size:15px} .srows span{flex:1} .srows small{display:block;color:var(--mute);font-size:12px}
+  .srows i{font-style:normal;font-weight:600;color:var(--accent);white-space:nowrap;font-size:12.5px}
+  #shop .foot{margin-top:14px} #shop .foot a{flex:1;padding:10px;border-radius:9px;text-align:center;text-decoration:none;background:var(--ink);color:#fff;font-weight:600}
   .mnav,.hudsum{display:none}
   .foot button{white-space:nowrap}
   @media (max-height:520px) and (min-width:821px){ #app{grid-template-columns:300px 1fr} #hud{width:200px;padding:10px 12px} #hint{display:none} }
@@ -126,6 +138,8 @@
     .seg button{min-height:42px;font-size:13px}
     .ikea{grid-template-columns:repeat(2,1fr)} .ikea button{min-height:54px;font-size:14px} .ikea small{font-size:12px}
     button.wide{min-height:44px}
+    #shop{margin:auto auto 0;width:100vw;max-width:100vw;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:88dvh}
+    #shop .foot a{min-height:46px;display:flex;align-items:center;justify-content:center}
     .links a{min-height:44px;display:flex;align-items:center;justify-content:center} .icard>button{min-height:44px}
     .sw{gap:11px} .sw button{width:44px;height:44px} .sw.sq button{width:48px}
     .tabs button{min-height:48px}
@@ -165,6 +179,7 @@
     <div id="err"></div>
   </main>
 </div>
+<dialog id="shop"></dialog>
 
 <script type="module">
 import * as THREE from 'three';
@@ -208,7 +223,7 @@ const SYSTEMS = {
   pax:{name:'PAX', tag:'wardrobe frames', style:'cabinet', gap:0, def:29.5,
     blurb:'Wardrobe frames that stand on the floor and fix to the wall. You fit them out with KOMPLEMENT shelves, clothes rails and drawers.',
     widths:[19.625,29.5,39.375], depths:[13.75,22.875], heights:[79.125,92.875],
-    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, graybeige:{name:'Gray-beige frames, white interiors',panel:'graybeige',shelf:'white',metal:WHITE}, darkgray:{name:'Dark gray',panel:'darkgray',shelf:'darkgray',metal:DGRAY}},
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE,q:['white','white','white']}, graybeige:{name:'Gray-beige frames, white interiors',panel:'graybeige',shelf:'white',metal:WHITE,q:['gray-beige','white','white']}, darkgray:{name:'Dark gray',panel:'darkgray',shelf:'darkgray',metal:DGRAY,q:['dark gray','dark gray','dark gray']}},
     parts:{frame:(w,d,h)=>`PAX wall-mounted storage frame ${frac(w)}×${frac(d)}×${frac(h)}″`, shelf:(w,d)=>`KOMPLEMENT shelf ${frac(w)}×${frac(d)}″`, shoe:(w,d)=>`KOMPLEMENT shelf ${frac(w)}×${frac(d)}″`, rail:w=>`KOMPLEMENT clothes rail ${frac(w)}″`, drawer:(w,d)=>`KOMPLEMENT drawer ${frac(w)}×${frac(d)}″`},
     url:'https://www.ikea.com/us/en/cat/pax-system-19086/',
     notes:'The 13 3/4″ deep frames are too shallow for a front-facing clothes rail, so hanging sections need the 22 7/8″ depth.',
@@ -225,7 +240,7 @@ const SYSTEMS = {
   boaxel:{name:'BOAXEL', tag:'wall-mounted rails', style:'rail', gap:.6, def:23.625,
     blurb:'Everything hangs from a rail screwed to the wall: uprights, brackets, shelves, clothes rails and mesh baskets. Nothing touches the floor.',
     widths:[23.625,31.5], depths:[15.75], hRange:[80,94],
-    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, oak:{name:'White with oak-effect shelves',panel:'white',shelf:'oak',metal:WHITE}, anthracite:{name:'Anthracite',panel:'darkgray',shelf:'darkgray',metal:'#3c3e41'}},
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE,q:['white','white','white']}, oak:{name:'White with oak-effect shelves',panel:'white',shelf:'oak',metal:WHITE,q:['white','oak effect','white']}, anthracite:{name:'Anthracite',panel:'darkgray',shelf:'darkgray',metal:'#3c3e41',q:['anthracite','anthracite','anthracite']}},
     parts:{shelf:w=>`BOAXEL shelf ${frac(w)}×15 3/4″`, shoe:w=>`BOAXEL shoe shelf ${frac(w)}×15 3/4″`, rail:w=>`BOAXEL clothes rail ${frac(w)}″`, drawer:w=>`BOAXEL mesh basket ${frac(w)}×15 3/4×5 7/8″`, bracket:()=>'BOAXEL bracket 15 3/4″'},
     url:'https://www.ikea.com/us/en/cat/boaxel-system-47394/',
     prices:[['Suspension rail 71 3/4″','$12'],['Wall upright 78 3/4″','$12'],['Bracket 15 3/4″','$3'],['Shelf 23 5/8×15 3/4″, white','$14'],['Shelf 31 1/2×15 3/4″, white','$16'],['Shelf 23 5/8×15 3/4″, oak effect','$18'],['Clothes rail 31 1/2″','$20'],['Mesh basket 23 5/8×15 3/4×5 7/8″','$19'],['Shoe shelf 31 1/2×15 3/4″','$14']],
@@ -241,7 +256,7 @@ const SYSTEMS = {
   aurdal:{name:'AURDAL', tag:'open side panels', style:'panel', gap:2.25, def:22.25,
     blurb:'Slim side panels on legs, hung from a wall rail, with shelves, clothes rails and drawers between them. Open, with no doors or back.',
     widths:[22.25], depths:[15.75], heights:[87],
-    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, darkgray:{name:'Dark gray',panel:'darkgray',shelf:'darkgray',metal:DGRAY}, oak:{name:'Oak veneer with white',panel:'oak',shelf:'white',metal:WHITE}, brownoak:{name:'Brown stained oak with dark gray',panel:'brownoak',shelf:'darkgray',metal:DGRAY}},
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE,q:['white','white','white']}, darkgray:{name:'Dark gray',panel:'darkgray',shelf:'darkgray',metal:DGRAY,q:['dark gray','dark gray','dark gray']}, oak:{name:'Oak veneer with white',panel:'oak',shelf:'white',metal:WHITE,q:['oak veneer','white','white']}, brownoak:{name:'Brown stained oak with dark gray',panel:'brownoak',shelf:'darkgray',metal:DGRAY,q:['brown stained oak veneer','dark gray','dark gray']}},
     parts:{shelf:()=>'AURDAL shelf 22 1/4×15 3/4″', shoe:()=>'AURDAL shoe shelf 22 1/4×15 3/4″', rail:()=>'AURDAL clothes rail 22 1/4″', drawer:()=>'AURDAL drawer 22×16 3/8×6 1/2″'},
     url:'https://www.ikea.com/us/en/cat/aurdal-system-47405/',
     notes:'IKEA also sells an extendable AURDAL clothes rail (22 3/8 to 35 3/8″) for wider hanging-only gaps. This tool models the standard 22 1/4″ sections only.',
@@ -258,7 +273,7 @@ const SYSTEMS = {
   elvarli:{name:'ELVARLI', tag:'floor-to-ceiling posts', style:'post', gap:2.2, def:31.5,
     blurb:'Posts clamp between floor and ceiling (87 1/4 to 137 3/4″) and carry brackets, shelves and clothes rails. White posts, with white or bamboo shelves.',
     widths:[15.75,31.5], depths:[14.125,20.125], hRange:[72,88],
-    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE}, bamboo:{name:'White posts, bamboo shelves',panel:'white',shelf:'bamboo',metal:WHITE}},
+    colors:{white:{name:'White',panel:'white',shelf:'white',metal:WHITE,q:['white','white','white']}, bamboo:{name:'White posts, bamboo shelves',panel:'white',shelf:'bamboo',metal:WHITE,q:['white','bamboo','white']}},
     parts:{shelf:(w,d)=>`ELVARLI shelf ${frac(w)}×${frac(d)}″${state.sysColor==='bamboo'?', bamboo':''}`, shoe:w=>`ELVARLI shoe shelf ${frac(w)}×14 1/8″`, rail:w=>`ELVARLI clothes rail ${frac(w)}″`, bracket:(w,d)=>`ELVARLI bracket for post ${frac(d)}″, 2-pack`},
     url:'https://www.ikea.com/us/en/cat/elvarli-system-35766/',
     notes:'Bamboo shelves are listed in the 20 1/8″ depth only, so choosing bamboo sets every wall to that depth. No ELVARLI drawer was listed, so drawer sections are switched off here.',
@@ -285,6 +300,12 @@ const PRICES = {
   'ELVARLI clothes rail 31 1/2″':20, 'ELVARLI shoe shelf 31 1/2×14 1/8″':30, 'ELVARLI bracket for post 14 1/8″, 2-pack':10, 'ELVARLI bracket for post 20 1/8″, 2-pack':10,
 };
 const STORE = {name:'IKEA Sunrise', addr:'151 NW 136th Ave, Sunrise, FL 33325', url:'https://www.ikea.com/us/en/stores/sunrise/'};
+function partColor(name){                                   // which of the scheme's colours this piece comes in
+  const q = SYSTEMS[state.sys].colors[state.sysColor].q;
+  return /shoe shelf|rail|bracket|upright|post|basket/.test(name) ? q[2] : /frame|side panel/.test(name) ? q[0] : q[1];
+}
+const shopUrl = name => 'https://www.ikea.com/us/en/search/?q=' + encodeURIComponent(
+  name.replace('″','').replace(/×/g,'x').replace(', bamboo','').replace(', 2-pack','') + ' ' + partColor(name));
 function allowed(S, depth, m){
   if (!S) return true;
   if (m === 'display') return false;
@@ -851,6 +872,7 @@ function renderPanel(){
       <ul class="plist">${S.prices.map(([n,p]) => `<li><span>${n}</span><b>${p}</b></li>`).join('')}</ul>
       <div class="links"><a href="${S.url}" target="_blank" rel="noopener">${S.name} on ikea.com</a><a href="${STORE.url}" target="_blank" rel="noopener">${STORE.name} store</a></div>
       <p class="note" style="margin:0 0 10px">Nearest store to Coral Springs: ${STORE.name}, ${STORE.addr}. Stock changes daily, so check each item's page for that store.</p>
+      <button class="pri" data-shop style="margin-bottom:8px">Shop these parts on IKEA</button>
       <button data-nosys>Switch back to custom cabinetry</button>
     </div>` : '';
   const heightCtl = !S ? `<div class="lbl">Cabinet height <span><output>${state.unitH}</output>″ of ${inch(R.H)}</span></div>
@@ -915,6 +937,7 @@ function renderPanel(){
   </section>
 
   ${S ? `<section class="s-details"><h2>IKEA parts in this layout</h2>
+    <button class="wide pri" data-shop style="margin:0 0 10px">Shop these parts on IKEA</button>
     <ul class="plist">${parts.map(([n,c]) => `<li><span>${c} × ${n}</span><b>${showPrice(n)}</b></li>`).join('')}</ul>
     <div class="note">Counted from the 3D model as a starting list. Fixings, feet and lighting are not included. A price appears only where that exact size was seen on ikea.com on Nov 16, 2026 (white finish). Confirm everything in IKEA's own planner before ordering.</div>
   </section>` : ''}
@@ -931,6 +954,25 @@ function renderPanel(){
 
   <div class="foot"><button data-reset>Reset</button><button data-link>Share this design</button><button class="pri" data-shot>Save image</button></div>`;
 }
+function openShop(){
+  const S = SYSTEMS[state.sys], dlg = document.getElementById('shop'); if (!S) return;
+  const parts = [...stats.parts].sort((a,b) => a[0].localeCompare(b[0]));
+  const base = state.sysColor === Object.keys(S.colors)[0];
+  dlg.innerHTML = `<div class="shead"><div><h3>${S.name} shopping list</h3><span>${S.colors[state.sysColor].name} · ${parts.reduce((a,p) => a+p[1], 0)} pieces</span></div><button data-close aria-label="Close">×</button></div>
+    <p class="note">Each row opens ikea.com at that piece and size. If it opens in a different color, choose the color named on the row. Set your store to ${STORE.name} there to see stock.</p>
+    <div class="srows">${parts.map(([n,c]) => `<a href="${shopUrl(n)}" target="_blank" rel="noopener"><b>${c}×</b><span>${n}<small>${partColor(n)}${PRICES[n] && (base || n.startsWith('ELVARLI')) ? ' · $'+PRICES[n]+' each when checked' : ''}</small></span><i>Open ↗</i></a>`).join('')}</div>
+    <div class="foot" style="display:flex"><button data-copy>Copy list</button><a class="pri" href="${S.url}" target="_blank" rel="noopener">All ${S.name} on IKEA</a></div>`;
+  dlg._text = `IKEA ${S.name} (${S.colors[state.sysColor].name})\n` + parts.map(([n,c]) => `${c} x ${n} (${partColor(n)})`).join('\n');
+  dlg.showModal();
+}
+document.getElementById('shop').addEventListener('click', ev => {
+  const dlg = ev.currentTarget;
+  if (ev.target === dlg || ev.target.closest('[data-close]')) dlg.close();
+  else if (ev.target.closest('[data-copy]')){
+    const b = ev.target.closest('[data-copy]');
+    (navigator.clipboard ? navigator.clipboard.writeText(dlg._text) : Promise.reject()).then(() => { b.textContent = 'Copied'; }, () => prompt('Copy this list', dlg._text));
+  }
+});
 function renderViews(){
   document.getElementById('views').innerHTML = Object.entries(VIEWS).map(([id,v]) => `<button data-view="${id}" class="${activeView===id?'on':''}">${v[0]}</button>`).join('');
 }
@@ -972,6 +1014,7 @@ panel.addEventListener('click', ev => {
     else prompt('Copy this link', url);
     return;
   }
+  if ('shop' in d){ openShop(); return; }
   if (d.preset){ state.sys = null; Object.assign(state, structuredClone(PRESETS[d.preset])); delete state.label; delete state.sub; state.unitH = Math.min(state.unitH, state.room.H); sel = {wall:'left', idx:0}; tab = 'left'; }
   else if (d.tab){ tab = d.tab; sel = {wall:tab, idx:0}; }
   else if (d.sel){ sel = {wall:tab, idx:+d.sel}; }
